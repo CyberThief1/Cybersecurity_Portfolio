@@ -10,7 +10,6 @@ This tool scans directories, hashes text files, and generates `.tag.txt` metadat
 
 - Multithreaded directory traversal and file processing
 - SHA256-based file fingerprinting and cache deduplication
-- OpenAI GPT integration for semantic tag generation
 - Automatic `.tag.txt` file creation alongside source files
 - Caching and manifest tracking to prevent reprocessing
 - Modular design for easy adaptation to other LLMs or prompt engines
