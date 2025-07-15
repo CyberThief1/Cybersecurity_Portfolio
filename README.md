@@ -1,6 +1,6 @@
 # 🛡 Asset Recurse Scanner
 
-**Author:** CyberThief1  
+**Author:** Brian Mendez  
 **Project Path:** `C:\Users\imbri\OneDrive\Desktop\Cybersecurity_Portfolio\Asset_Recurse_scanner`  
 **Purpose:** File integrity & asset inventory snapshot for cybersecurity operations
 
