@@ -1,51 +1,49 @@
+# asset_inventory.py
+
 import os
 import argparse
+import hashlib
 import csv
 
-def scan_assets(project_path):
-    """
-    Generator yielding unique tuples of (asset_type, relative_path)
-    for all files and directories under project_path.
-    """
-    seen = set()
-    for root, dirs, files in os.walk(project_path):
-        for d in dirs:
-            rel_path = os.path.relpath(os.path.join(root, d), project_path)
-            if rel_path not in seen:
-                seen.add(rel_path)
-                yield ('directory', rel_path)
-        for f in files:
-            rel_path = os.path.relpath(os.path.join(root, f), project_path)
-            if rel_path not in seen:
-                seen.add(rel_path)
-                yield ('file', rel_path)
+def calculate_sha256(filepath):
+    sha256 = hashlib.sha256()
+    try:
+        with open(filepath, 'rb') as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                sha256.update(chunk)
+        return sha256.hexdigest()
+    except Exception as e:
+        return f"[ERROR] {e}"
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Scan a project folder and output an asset inventory CSV."
-    )
-    parser.add_argument('-p', '--project-path',
-                        required=True,
-                        help='Root path to scan')
-    parser.add_argument('-o', '--output',
-                        required=True,
-                        help='CSV output file')
+def scan_directory(target_dir):
+    inventory = []
+    for root, _, files in os.walk(target_dir):
+        for file in files:
+            full_path = os.path.join(root, file)
+            sha256_hash = calculate_sha256(full_path)
+            inventory.append({
+                'full_path': full_path,
+                'filename': file,
+                'sha256': sha256_hash
+            })
+    return inventory
+
+def write_to_csv(data, output_path):
+    with open(output_path, mode='w', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=['full_path', 'filename', 'sha256'])
+        writer.writeheader()
+        writer.writerows(data)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Asset Inventory Scanner")
+    parser.add_argument('--target', type=str, default=os.getcwd(),
+                        help="Target directory to scan (default: current directory)")
     args = parser.parse_args()
 
-    root = os.path.abspath(args.project_path)
-    if not os.path.isdir(root):
-        print(f"Error: Path not found: {root}")
-        return
+    print(f"[+] Scanning directory: {args.target}")
+    results = scan_directory(args.target)
 
-    try:
-        with open(args.output, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['asset_type', 'relative_path'])
-            for asset_type, rel_path in scan_assets(root):
-                writer.writerow([asset_type, rel_path])
-        print(f"Asset inventory successfully written to {args.output}")
-    except Exception as e:
-        print(f"Failed to write inventory: {e}")
-
-if __name__ == '__main__':
-    main()
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_output = os.path.join(script_dir, 'asset_inventory.csv')
+    write_to_csv(results, csv_output)
+    print(f"[✓] Inventory written to: {csv_output}")
