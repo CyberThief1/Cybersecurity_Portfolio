@@ -2,7 +2,7 @@
 
 Welcome to my cybersecurity portfolio. I'm an aspiring cybersecurity engineer focused on automation, backend development, and security tooling. This repository showcases my practical skills in Python, PowerShell, and systems engineering through a series of hands-on, real-world projects.
 
-Each project is built to reflect what security professionals actually need in the field — from file integrity monitoring and asset discovery to GPT-enhanced tagging systems and threat-informed automation.
+Each project is built to reflect what security professionals actually need in the field — from file integrity monitoring and asset discovery.
 
 ---
 
@@ -12,7 +12,9 @@ Each project is built to reflect what security professionals actually need in th
 |--------------------------|-----------------------------------------------------------------------------|
 | `asset_integrity_monitor` | A Python-based file integrity scanner that builds hashed inventories for system baselining, tamper detection, and forensic audits. Includes PowerShell runner. |
 | `logic_tag_writer`        | A multithreaded, GPT-powered semantic file tagger that uses SHA256 caching and OpenAI to enrich text files with logic tags for knowledge management and threat analysis. |
-
+|
+|
+|
 ---
 
 ## Tools & Languages Used
