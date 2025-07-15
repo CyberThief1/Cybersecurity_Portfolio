@@ -1,4 +1,4 @@
-# Cybersecurity Portfolio – Brian (CyberThief1)
+# Cybersecurity Portfolio – Brian Mendez
 
 Welcome to my cybersecurity portfolio. I'm an aspiring cybersecurity engineer focused on automation, backend development, and security tooling. This repository showcases my practical skills in Python, PowerShell, and systems engineering through a series of hands-on, real-world projects.
 
