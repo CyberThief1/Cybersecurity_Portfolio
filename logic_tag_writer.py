@@ -2,72 +2,70 @@
 
 import os
 import hashlib
-import threading
-import openai
 import argparse
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-
-# Load your OpenAI API key from environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 CACHE_FILE = "tagging_manifest.csv"
 SUPPORTED_EXTENSIONS = [".txt"]
 LOCK = threading.Lock()
 
+# Define rule-based keyword tag map
+KEYWORD_TAGS = {
+    "ransomware": ["ransomware", "encryption", "file-locking"],
+    "c2": ["command-control", "callback", "beacon"],
+    "exfil": ["data-exfiltration", "exfil"],
+    "persistence": ["startup-injection", "registry-hook", "autorun"],
+    "lateral": ["lateral-movement", "pivoting"],
+    "dns": ["dns-tunneling", "covert-channel"],
+    "phishing": ["email-attack", "credential-theft"],
+    "powershell": ["scripted-attack", "living-off-land"],
+    "mimikatz": ["credential-dumping", "memory-extraction"],
+}
+
 def sha256_hash(filepath):
-    """Calculate the SHA256 hash of a file."""
-    hash_obj = hashlib.sha256()
+    """Calculate SHA256 hash of a file."""
+    h = hashlib.sha256()
     with open(filepath, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):
-            hash_obj.update(chunk)
-    return hash_obj.hexdigest()
+            h.update(chunk)
+    return h.hexdigest()
 
 def already_processed(file_hash):
-    """Check if file hash is already in the manifest cache."""
+    """Check if hash exists in cache."""
     if not os.path.exists(CACHE_FILE):
         return False
     with open(CACHE_FILE, "r", encoding="utf-8") as f:
         return any(file_hash in line for line in f)
 
 def append_to_cache(file_hash, filepath):
-    """Record processed file hash + path to manifest."""
+    """Append hash to manifest cache."""
     with LOCK:
         with open(CACHE_FILE, "a", encoding="utf-8") as f:
             f.write(f"{file_hash},{filepath}\n")
 
-def generate_tags(file_path):
-    """Send file content to GPT and extract tags."""
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
+def classify_text(content):
+    """Apply keyword rules to content and return logic tags."""
+    tags_found = set()
+    for keyword, tags in KEYWORD_TAGS.items():
+        if keyword.lower() in content.lower():
+            tags_found.update(tags)
 
-    prompt = (
-        "You are an AI semantic classifier.\n"
-        "Given the content of this file, return logic tags that describe it.\n"
-        "Use this format:\n"
-        "[LOGIC_TAGS]: tag1, tag2, tag3\n"
-        "[FUNCTION]: short_summary\n"
-        "[CONNECTION_SCOPE]: global or local\n\n"
-        "Content:\n"
-        f"{content}\n"
-    )
+    if not tags_found:
+        tags_found.add("unclassified")
 
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
-    )
+    return sorted(tags_found)
 
-    return response.choices[0].message.content.strip()
-
-def write_tag_file(original_path, tag_content):
-    """Write tag file next to original."""
+def write_tag_file(original_path, tags):
+    """Write the tag file next to the source file."""
     tag_path = Path(f"{original_path}.tag.txt")
     with open(tag_path, "w", encoding="utf-8") as f:
-        f.write(tag_content)
+        f.write(f"[LOGIC_TAGS]: {', '.join(tags)}\n")
+        f.write("[FUNCTION]: static-rule-classifier\n")
+        f.write("[CONNECTION_SCOPE]: local\n")
 
 def process_file(file_path):
-    """Main logic: hash, check, tag, write."""
     try:
         file_hash = sha256_hash(file_path)
         if already_processed(file_hash):
@@ -75,31 +73,34 @@ def process_file(file_path):
             return
 
         print(f"[+] Tagging: {file_path}")
-        tag_data = generate_tags(file_path)
-        write_tag_file(file_path, tag_data)
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        tags = classify_text(content)
+        write_tag_file(file_path, tags)
         append_to_cache(file_hash, file_path)
 
     except Exception as e:
         print(f"[!] Error processing {file_path}: {e}")
 
 def scan_and_tag(directory):
-    """Walk the directory and process supported files."""
+    """Walk the directory and process all text files."""
     all_files = []
     for root, _, files in os.walk(directory):
         for name in files:
-            full_path = os.path.join(root, name)
-            if Path(full_path).suffix.lower() in SUPPORTED_EXTENSIONS:
+            if Path(name).suffix.lower() in SUPPORTED_EXTENSIONS:
+                full_path = os.path.join(root, name)
                 all_files.append(full_path)
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:
         executor.map(process_file, all_files)
 
 def main():
-    parser = argparse.ArgumentParser(description="Semantic Logic Tagging Engine")
-    parser.add_argument("directory", help="Root directory to scan for text files")
+    parser = argparse.ArgumentParser(description="Static logic tagger (non-AI)")
+    parser.add_argument("directory", help="Folder of .txt files to tag")
     args = parser.parse_args()
 
-    print(f"[+] Scanning: {args.directory}")
+    print(f"[+] Scanning folder: {args.directory}")
     scan_and_tag(args.directory)
     print("[✓] Tagging complete.")
 
