@@ -27,7 +27,7 @@ def scan_directory(target_dir):
                 'sha256': sha256_hash
             })
     return inventory
-
+# writes to a csv file
 def write_to_csv(data, output_path):
     with open(output_path, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.DictWriter(f, fieldnames=['full_path', 'filename', 'sha256'])
