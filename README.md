@@ -1,6 +1,7 @@
 Packet Sniffer (Python + Scapy)
 
-                                                                                                                        Overview
+
+Overview
 
 This project is a basic, professional-grade **packet sniffer** built in Python using the Scapy library. It captures live IP traffic from the local network interface, prints the protocol, source, and destination of each packet to the console, and logs all activity to a CSV file in real time.
 
