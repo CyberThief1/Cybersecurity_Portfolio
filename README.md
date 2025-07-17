@@ -12,9 +12,10 @@ Each project is built to reflect what security professionals actually need in th
 |--------------------------|-----------------------------------------------------------------------------|
 | `asset_integrity_monitor` | A Python-based file integrity scanner that builds hashed inventories for system baselining, tamper detection, and forensic audits. Includes PowerShell runner. |
 | `logic_tag_writer`        | A multithreaded, semantic file tagger that uses SHA256 caching and OpenAI to enrich text files with logic tags for knowledge management and threat analysis. |
-| `asset_recurse_scanner`   |
-| `logic_tag_writer`        |
-| `security_log_collector`  |
+| `asset_recurse_scanner`   | An asset grabbing parser that grabs all file contents in a directory and returns a .csv file with file size, SHA 256 hash, and the file name and address.|
+| `logic_tag_writer`        | A Python utility that scans text-based files, extracts key logic or behavioral tags using static rules, and saves them as metadata to support analysis, classification, or journaling workflows.|
+| `security_log_collector`  | A Windows-based security audit helper that collects system event logs, compresses them, verifies their integrity with SHA256, and optionally encrypts them for secure storage or forensic use.|
+| `Packet_Sniffer`          | |
 ---
 
 ## Tools & Languages Used
