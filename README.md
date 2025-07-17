@@ -22,7 +22,7 @@ Designed as part of my **Cybersecurity Portfolio**, this tool demonstrates core 
 - Timestamps each packet down to the second
 - Writes all packet data to `packet_log.csv` in the script directory
 
-## 🔧 Files
+ Files
 
 | File               | Description |
 |--------------------|-------------|
@@ -31,11 +31,11 @@ Designed as part of my **Cybersecurity Portfolio**, this tool demonstrates core 
 | `packet_log.csv`    | Output log file (auto-created on first run) |
 | `cheatsheet_snippets.txt` | Reference for `()` vs `[]` in Python syntax |
 
-## ⚙️ Requirements
+Requirements
 
-- Python 3.6+
-- [Scapy](https://scapy.net/)
-- [Npcap](https://nmap.org/npcap/) (Windows only)
+- Python 
+- [Scapy]
+- [Npcap]  (Windows only)
 - Admin privileges (to access the network interface)
 
 Install Scapy:
